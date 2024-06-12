@@ -1,0 +1,45 @@
+#!/bin/bash
+
+##########################################################################
+# A wrapper script to be used around abduco when the goal is to minimize
+# the use of the Xterm Alternate Screen Buffer, which abduco flips into
+# by default, both at session creation and at session attachment. It is
+# designed to be placed in ~/.local/bin/ or ~/bin as appropriate.
+#
+# Written June of 2024 by Lester Hightower.
+# Hosted at https://github.com/hightowe/abduco-wrapper
+##########################################################################
+
+REAL_EXE="/usr/local/bin/abduco" # The path to the abduco executable
+APP_NAME=$(basename "$REAL_EXE")
+# Default command is ABDUCO_CMD which is ignored if a command is supplied
+ABDUCO_CMD="/bin/bash -c \"printf '\033[?1049l'; exec /bin/bash -i\""
+
+echo_stop_alt_screen_info () {
+  echo "To stop \"alt screen\":"
+  echo " - printf '\033[?1049l'"
+  echo " - tput rmcup"
+}
+
+if [ "$1" == "" ]; then
+  "$REAL_EXE"  # List sessions
+  echo "--"
+  echo "To create a session:"
+  echo " - $APP_NAME -c <session-name>    (to run $ABDUCO_CMD)"
+  echo " - $APP_NAME -c <session-name> /bin/bash (or something else)"
+  echo "To attach to a session, use $APP_NAME -a <session-name>"
+  echo "CTRL-\ detaches from the active session."
+  echo_stop_alt_screen_info
+else
+  # Loop over the given options looking for ones to act upon
+  for opt in "$@"; do
+    if [ "$opt" == "-a" ]; then
+      echo "It seems you are trying to attach to an existing session."
+      echo "This information may be helpful to you. You may want to"
+      echo "copy one of these commands to use once attached..."
+      echo_stop_alt_screen_info
+      echo -e "\nPress any key to continue..."; read -n1 ans
+    fi
+  done
+  ABDUCO_CMD="$ABDUCO_CMD" exec "$REAL_EXE" "$@"
+fi
