@@ -15,6 +15,20 @@ APP_NAME=$(basename "$REAL_EXE")
 # Default command is ABDUCO_CMD which is ignored if a command is supplied
 ABDUCO_CMD="/bin/bash -c \"printf '\033[?1049l'; exec /bin/bash -i\""
 
+# Look for -a or -A, grab the session to attach to, and warn if
+# that session is already attached as doing so from within an abduco
+# session (recursive attachment) is very problematic.
+ATTACH_SESSION=""
+getopts ':a:A:' opt_attach
+if [[ "$opt_attach" =~ [aA] ]]; then
+  ATTACH_SESSION=$OPTARG
+  "$REAL_EXE" | grep -E --color "^[*].+\s$ATTACH_SESSION$"
+  if [ "$?" == "0" ]; then
+    echo "WARNING: Session $ATTACH_SESSION is already attached to!"
+    echo -e "Press Ctrl-C to stop or any other key to continue..."; read -n1 ans
+  fi
+fi
+
 echo_stop_alt_screen_info () {
   echo "To stop \"alt screen\":"
   echo " - printf '\033[?1049l'"
@@ -38,7 +52,7 @@ else
       echo "This information may be helpful to you. You may want to"
       echo "copy one of these commands to use once attached..."
       echo_stop_alt_screen_info
-      echo -e "\nPress any key to continue..."; read -n1 ans
+      echo -e "\nPress any key to continue or Ctrl-C to stop..."; read -n1 ans
     fi
   done
   ABDUCO_CMD="$ABDUCO_CMD" exec "$REAL_EXE" "$@"
