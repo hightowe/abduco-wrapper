@@ -1,0 +1,10 @@
+--- Makefile.orig	2024-06-13 11:17:42.533933781 -0400
++++ Makefile	2024-06-13 11:19:24.209942204 -0400
+@@ -47,6 +47,7 @@
+ 	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
+ 	@mkdir -p ${DESTDIR}${PREFIX}/bin
+ 	@cp -f abduco ${DESTDIR}${PREFIX}/bin
++	@cp -f abduco-wrapper ${DESTDIR}${PREFIX}/bin
+ 	@chmod 755 ${DESTDIR}${PREFIX}/bin/abduco
+ 	@echo installing manual page to ${DESTDIR}${MANPREFIX}/man1
+ 	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
